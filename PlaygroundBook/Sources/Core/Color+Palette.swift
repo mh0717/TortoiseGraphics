@@ -24,5 +24,6 @@ extension Color {
     public static let brown = Color("795548", name: "brown")
     public static let grey = Color("9E9E9E", name: "grey")
     public static let blueGrey = Color("607D8B", name: "blueGrey")
+    public static let transparent = Color("000000", name:"transparent")
 
 }
