@@ -4,7 +4,7 @@ import UIKit
 public class PlaygroundCanvas: UIView, Canvas, TortoiseDelegate {
 
     public init(size: Vec2D, color: Color? = nil) {
-        self.canvasColor = color ?? .white
+        self.canvasColor = color ?? .transparent
         self.imageCanvas = ImageCanvas(size: size, scale: Double(UIScreen.main.scale), color: self.canvasColor)
         super.init(frame: CGRect(origin: .zero, size: size.toCGSize()))
     }
@@ -422,6 +422,7 @@ public class PlaygroundCanvas: UIView, Canvas, TortoiseDelegate {
             layer.contents = imageCanvas.cgImage
         }
         else {
+//            layer.contents = imageCanvas.cgImage
             weak var wself = self
             DispatchQueue.main.sync {
                 wself?.layer.contents = wself?.imageCanvas.cgImage
