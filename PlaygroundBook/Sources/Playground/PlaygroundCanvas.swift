@@ -12,6 +12,14 @@ public class PlaygroundCanvas: UIView, Canvas, TortoiseDelegate {
     required init?(coder decoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
+    
+    public override func layoutSubviews() {
+        super.layoutSubviews()
+        
+        if (self.bounds.size != self.imageCanvas.canvasSize.toCGSize()) {
+            canvasDidLayout()
+        }
+    }
 
     // MARK: - Canvas
 
@@ -410,7 +418,16 @@ public class PlaygroundCanvas: UIView, Canvas, TortoiseDelegate {
 
     private func handleChangeBackgroundEvent(_ color: Color, _ completion: () -> Void) {
         imageCanvas.canvasColor(color)
-        layer.contents = imageCanvas.cgImage
+        if (Thread.isMainThread) {
+            layer.contents = imageCanvas.cgImage
+        }
+        else {
+            weak var wself = self
+            DispatchQueue.main.sync {
+                wself?.layer.contents = wself?.imageCanvas.cgImage
+            }
+        }
+       
         completion()
     }
 
@@ -421,8 +438,8 @@ public class PlaygroundCanvas: UIView, Canvas, TortoiseDelegate {
                                     scale: Double(UIScreen.main.scale),
                                     color: canvasColor)
         if let oldImage = imageCanvas.cgImage {
-            let drawRect = CGRect(x: (newSize.width - oldSize.width) * 0.5,
-                                  y: (newSize.height - oldSize.height) * 0.5,
+            let drawRect = CGRect(x: (/*newSize.width*/0 - oldSize.width) * 0.5,
+                                  y: (/*newSize.height*/0 - oldSize.height) * 0.5,
                                   width: oldSize.width,
                                   height: oldSize.height)
             newCanvas.drawImage(oldImage, in: drawRect)
