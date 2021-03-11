@@ -5,7 +5,7 @@ public class ImageCanvas: Canvas, TortoiseDelegate {
 
     public init(size: Vec2D, scale: Double = 1, color: Color? = nil) {
         self.canvasSize = size
-        self.canvasColor = color ?? .white
+        self.canvasColor = color ?? .transparent
         self.bitmapScale = CGFloat(scale)
         self.bitmapContext = createForegroundContext(size: size.toCGSize(),
                                                      scale: self.bitmapScale)
@@ -14,7 +14,13 @@ public class ImageCanvas: Canvas, TortoiseDelegate {
     public var cgImage: CGImage? {
         let size = canvasSize.toCGSize()
         let bgContext = createBackgroundContext(size: size, scale: bitmapScale)
-        bgContext?.setFillColor(canvasColor.cgColor)
+        if (canvasColor == Color.transparent) {
+            bgContext?.setFillColor(CGColor.clear)
+        }
+        else {
+            bgContext?.setFillColor(canvasColor.cgColor)
+        }
+        
         bgContext?.fill(CGRect(origin: .zero, size: size))
         if let fgImage = bitmapContext?.makeImage() {
             bgContext?.draw(fgImage, in: CGRect(origin: .zero, size: size))
@@ -61,6 +67,8 @@ public class ImageCanvas: Canvas, TortoiseDelegate {
         bitmapContext?.setStrokeColor(state.pen.color.cgColor)
         bitmapContext?.setFillColor(CGColor.clear)
         bitmapContext?.setLineWidth(CGFloat(state.pen.width))
+        bitmapContext?.setLineJoin(CGLineJoin.round)
+        bitmapContext?.setLineCap(CGLineCap.round)
         bitmapContext?.addPath([position, state.position].toCGPath())
         bitmapContext?.strokePath()
         bitmapContext?.restoreGState()
