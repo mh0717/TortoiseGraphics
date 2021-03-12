@@ -12,20 +12,21 @@ public class ImageCanvas: Canvas, TortoiseDelegate {
     }
 
     public var cgImage: CGImage? {
-        let size = canvasSize.toCGSize()
-        let bgContext = createBackgroundContext(size: size, scale: bitmapScale)
-        if (canvasColor == Color.transparent) {
-            bgContext?.setFillColor(CGColor.clear)
-        }
-        else {
-            bgContext?.setFillColor(canvasColor.cgColor)
-        }
-        
-        bgContext?.fill(CGRect(origin: .zero, size: size))
-        if let fgImage = bitmapContext?.makeImage() {
-            bgContext?.draw(fgImage, in: CGRect(origin: .zero, size: size))
-        }
-        return bgContext?.makeImage()
+//        let size = canvasSize.toCGSize()
+//        let bgContext = createBackgroundContext(size: size, scale: bitmapScale)
+//        if (canvasColor == Color.transparent) {
+//            bgContext?.setFillColor(CGColor.clear)
+//        }
+//        else {
+//            bgContext?.setFillColor(canvasColor.cgColor)
+//        }
+//
+//        bgContext?.fill(CGRect(origin: .zero, size: size))
+//        if let fgImage = bitmapContext?.makeImage() {
+//            bgContext?.draw(fgImage, in: CGRect(origin: .zero, size: size))
+//        }
+//        return bgContext?.makeImage()
+        return bitmapContext?.makeImage()
     }
 
     // MARK: - Canvas
