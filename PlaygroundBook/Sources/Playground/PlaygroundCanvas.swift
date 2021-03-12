@@ -35,18 +35,33 @@ public class PlaygroundCanvas: UIView, Canvas, TortoiseDelegate {
     }
 
     public func canvasColor(_ r: Double, _ g: Double, _ b: Double) {
-        canvasColor = Color(r, g, b)
-        addEvent(.canvasDidChangeBackground(canvasColor))
+        let canvasColor = Color(r, g, b)
+//        addEvent(.canvasDidChangeBackground(canvasColor))
+//        layer.backgroundColor = canvasColor.cgColor
+        self.canvasColor(canvasColor)
+        
     }
 
     public func canvasColor(_ hex: String) {
-        canvasColor = Color(hex)
-        addEvent(.canvasDidChangeBackground(canvasColor))
+        let canvasColor = Color(hex)
+//        addEvent(.canvasDidChangeBackground(canvasColor))
+//        layer.backgroundColor = canvasColor.cgColor
+        self.canvasColor(canvasColor)
     }
 
     public func canvasColor(_ color: Color) {
         canvasColor = color
-        addEvent(.canvasDidChangeBackground(canvasColor))
+//        addEvent(.canvasDidChangeBackground(canvasColor))
+        if (Thread.isMainThread) {
+            
+        }
+        else {
+            weak var wself = self
+            DispatchQueue.main.sync {
+                wself?.layer.backgroundColor = wself?.canvasColor.cgColor
+            }
+        }
+        
     }
 
     public private(set) var canvasColor: Color
@@ -435,6 +450,8 @@ public class PlaygroundCanvas: UIView, Canvas, TortoiseDelegate {
     private func handleLayoutEvent(_ completion: @escaping () -> Void) {
         let oldSize = imageCanvas.canvasSize.toCGSize()
         let newSize = bounds.size
+        print(oldSize)
+        print(newSize)
         let newCanvas = ImageCanvas(size: Vec2D(size: newSize),
                                     scale: Double(UIScreen.main.scale),
                                     color: canvasColor)
