@@ -264,5 +264,9 @@ public class Tortoise {
     var state: TortoiseState = TortoiseState()
 
     weak var delegate: TortoiseDelegate?
+    
+    public var dlgt: Any? {
+        return delegate
+    }
 
 }
