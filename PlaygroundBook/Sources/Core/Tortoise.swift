@@ -186,7 +186,7 @@ public class Tortoise {
     }
 
     public func fillColor(_ hex: String) {
-        state.pen.color = Color(hex)
+        state.pen.fillColor = Color(hex)
         delegate?.tortoiseDidChangePen(uuid, state)
     }
 
