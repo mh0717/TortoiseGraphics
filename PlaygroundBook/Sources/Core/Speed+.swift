@@ -17,13 +17,9 @@ extension Speed {
     }
 
     private var velocity: UInt8 {
-        switch self {
-        case .fastest: return 0
-        case .fast: return 8
-        case .normal: return 6
-        case .slow: return 4
-        case .slowest: return 2
-        }
+        if (self < 0) {return 0}
+        if (self > 10) {return 10}
+        return UInt8(self)
     }
 
 }

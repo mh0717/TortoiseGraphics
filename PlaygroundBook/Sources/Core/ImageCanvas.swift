@@ -73,6 +73,9 @@ public class ImageCanvas: Canvas, TortoiseDelegate {
         bitmapContext?.addPath([position, state.position].toCGPath())
         bitmapContext?.strokePath()
         bitmapContext?.restoreGState()
+        if (state.fillPath != nil) {
+            strokePathsInFill.append((width: state.pen.width, color: state.pen.color, s: position, e: state.position))
+        }
     }
 
     func tortoiseDidChangeHeading(_ uuid: UUID, _ state: TortoiseState) {
@@ -93,8 +96,22 @@ public class ImageCanvas: Canvas, TortoiseDelegate {
         bitmapContext?.setStrokeColor(CGColor.clear)
         bitmapContext?.setFillColor(state.pen.fillColor.cgColor)
         bitmapContext?.addPath(fillPath.toCGPath())
-        bitmapContext?.fillPath(using: .evenOdd)
+        bitmapContext?.fillPath(using: .winding)
         bitmapContext?.restoreGState()
+        
+        bitmapContext?.saveGState()
+        bitmapContext?.setFillColor(CGColor.clear)
+        bitmapContext?.setLineJoin(CGLineJoin.round)
+        bitmapContext?.setLineCap(CGLineCap.round)
+        strokePathsInFill.forEach { e in
+            bitmapContext?.setStrokeColor(e.color.cgColor)
+            bitmapContext?.setLineWidth(CGFloat(e.width))
+//            bitmapContext?.addPath([e.s, e.e].toCGPath())
+//            bitmapContext?.strokePath()
+            bitmapContext?.strokeLineSegments(between: [CGPoint(x: e.s.x, y: e.s.y), CGPoint(x: e.e.x, y: e.e.y)])
+        }
+        bitmapContext?.restoreGState()
+        strokePathsInFill.removeAll()
     }
 
     func tortoiseDidRequestToClear(_ uuid: UUID, _ state: TortoiseState) {
@@ -119,6 +136,8 @@ public class ImageCanvas: Canvas, TortoiseDelegate {
     private let bitmapScale: CGFloat
 
     private var tortoisePositions: [UUID: Vec2D] = [:]
+    
+    private var strokePathsInFill: [(width: Double, color: Color, s: Vec2D, e: Vec2D)] = []
 
 }
 

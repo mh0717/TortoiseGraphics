@@ -70,20 +70,20 @@ public class Tortoise {
         let distance = 2 * radius * cos(Angle(baseAngle, .degree).radian)
         for index in 1 ... definedSteps {
             if index == 1 {
-                right(-leftAngle1)
+                right(radius > 0 ? -leftAngle1 : leftAngle1)
             } else {
-                right(-leftAngleN)
+                right(radius > 0 ? -leftAngleN : leftAngleN)
             }
-            forward(distance)
+            forward(radius > 0 ? distance : -distance)
         }
-        right(-leftAngle1)
+        right(radius > 0 ? -leftAngle1 : leftAngle1)
     }
 
     public func speed(_ speed: Speed) {
         state.speed = speed
     }
 
-    var speed: Speed {
+    public var speed: Speed {
         return state.speed
     }
 
@@ -264,7 +264,7 @@ public class Tortoise {
     var state: TortoiseState = TortoiseState()
 
     weak var delegate: TortoiseDelegate?
-    
+
     public var dlgt: Any? {
         return delegate
     }

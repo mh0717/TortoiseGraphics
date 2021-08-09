@@ -12,7 +12,7 @@ struct TortoiseState: Equatable, Codable {
 
     var isVisible: Bool = true
 
-    var speed: Speed = .normal
+    var speed: Speed = 6
 
     var strokePath: [Vec2D] = []
 

@@ -33,7 +33,7 @@ extension Shape.Path {
             Vec2D( 0.00, -1.00),
             Vec2D( 0.00, -0.70),
             Vec2D(-0.50, -0.70)
-            ])
+        ].map({Vec2D($0.y, $0.x)}))
     }
 
     static func tortoisePath() -> Shape.Path {
@@ -53,7 +53,9 @@ extension Shape.Path {
             Vec2D( 0.00, -0.66)
         ]
         let side2 = side1.map { Vec2D(-$0.x, $0.y) }.reversed()
-        return .points(side1 + side2)
+        let side = (side1 + side2).map { Vec2D($0.y, $0.x)}
+        return  .points(side)
+        
     }
 
     static func circlePath() -> Shape.Path {

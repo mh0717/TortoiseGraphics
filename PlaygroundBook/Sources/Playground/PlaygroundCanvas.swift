@@ -12,10 +12,10 @@ public class PlaygroundCanvas: UIView, Canvas, TortoiseDelegate {
     required init?(coder decoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-    
+
     public override func layoutSubviews() {
         super.layoutSubviews()
-        
+
         if (self.bounds.size != self.imageCanvas.canvasSize.toCGSize()) {
             canvasDidLayout()
         }
@@ -39,7 +39,7 @@ public class PlaygroundCanvas: UIView, Canvas, TortoiseDelegate {
 //        addEvent(.canvasDidChangeBackground(canvasColor))
 //        layer.backgroundColor = canvasColor.cgColor
         self.canvasColor(canvasColor)
-        
+
     }
 
     public func canvasColor(_ hex: String) {
@@ -53,15 +53,14 @@ public class PlaygroundCanvas: UIView, Canvas, TortoiseDelegate {
         canvasColor = color
 //        addEvent(.canvasDidChangeBackground(canvasColor))
         if (Thread.isMainThread) {
-            
-        }
-        else {
+
+        } else {
             weak var wself = self
             DispatchQueue.main.sync {
                 wself?.layer.backgroundColor = wself?.canvasColor.cgColor
             }
         }
-        
+
     }
 
     public private(set) var canvasColor: Color
@@ -209,6 +208,8 @@ public class PlaygroundCanvas: UIView, Canvas, TortoiseDelegate {
     }
 
     private func handleChangePositionEvent(_ uuid: UUID, _ state: TortoiseState, _ completion: @escaping () -> Void) {
+//        CATransition.setValue(0.05, forKey: kCATransactionAnimationDuration)
+        
         let shapeLayer = tortoiseShapeMap[uuid]?.shapeLayer
         let toPos = translatedPosition(position: state.position.toCGPoint())
         let fromPos = shapeLayer?.position ?? .zero
@@ -235,7 +236,7 @@ public class PlaygroundCanvas: UIView, Canvas, TortoiseDelegate {
         let distance = Double(fromPos.distance(to: toPos))
         CATransaction.transaction({ [weak self] in
             let duration = state.speed.movementDuration(distance: distance)
-
+            CATransaction.setValue(duration, forKey: kCATransactionAnimationDuration)
             if let pathLayer = pathLayer {
                 self?.layer.insertSublayer(pathLayer, at: 0)
                 pathLayer.frame = CGRect(origin: .zero, size: .zero)
@@ -262,14 +263,18 @@ public class PlaygroundCanvas: UIView, Canvas, TortoiseDelegate {
 
         }, completion: completionBlock)
     }
+    
+    private var lastHeading = 0.0;
 
     private func handleChangeHeadingEvent(_ uuid: UUID, _ state: TortoiseState, _ completion: @escaping () -> Void) {
+        let heading = state.heading.degree
         let shapeLayer = tortoiseShapeMap[uuid]?.shapeLayer
         let toTransform = rotatedTransform(angle: state.heading)
 
         let completionBlock = { [weak self] in
             self?.imageCanvas.tortoiseDidChangeHeading(uuid, state)
             self?.layer.contents = self?.imageCanvas.cgImage
+            self?.lastHeading = heading
             CATransaction.transactionWithoutAnimation({
                 shapeLayer?.transform = toTransform
                 shapeLayer?.removeAllAnimations()
@@ -282,9 +287,14 @@ public class PlaygroundCanvas: UIView, Canvas, TortoiseDelegate {
         }
 
         CATransaction.transaction({
+            var duration = abs(state.speed.movementDuration(distance: state.heading.degree - lastHeading) * 0.3)
+            if (duration > 0.5) {
+                duration = 0.5
+            }
+            CATransaction.setValue(duration, forKey: kCATransactionAnimationDuration)
             let shapeAnimation = CABasicAnimation(keyPath: #keyPath(CAShapeLayer.transform))
             shapeAnimation.toValue = toTransform
-            shapeAnimation.duration = state.speed.animationDuration()
+            shapeAnimation.duration = duration
             shapeAnimation.fillMode = .forwards
             shapeAnimation.isRemovedOnCompletion = false
             shapeLayer?.add(shapeAnimation, forKey: "shape-transform")
@@ -404,7 +414,7 @@ public class PlaygroundCanvas: UIView, Canvas, TortoiseDelegate {
                 fillLayer.backgroundColor = CGColor.clear
                 fillLayer.strokeColor = CGColor.clear
                 fillLayer.fillColor = state.pen.fillColor.cgColor
-                fillLayer.fillRule = .evenOdd
+                fillLayer.fillRule = .nonZero
 
                 let animation = CABasicAnimation(keyPath: #keyPath(CAShapeLayer.opacity))
                 animation.toValue = 1
@@ -435,15 +445,14 @@ public class PlaygroundCanvas: UIView, Canvas, TortoiseDelegate {
         imageCanvas.canvasColor(color)
         if (Thread.isMainThread) {
             layer.contents = imageCanvas.cgImage
-        }
-        else {
+        } else {
 //            layer.contents = imageCanvas.cgImage
             weak var wself = self
             DispatchQueue.main.sync {
                 wself?.layer.contents = wself?.imageCanvas.cgImage
             }
         }
-       
+
         completion()
     }
 
